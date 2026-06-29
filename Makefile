@@ -39,7 +39,7 @@ REAL_GID  := $(shell id -g $(REAL_USER) 2>/dev/null || id -g)
 all: release
 
 run: compile
-	@echo "$(GREEN)[Running $(TARGET)]$(RESET)"
+	@echo "$(GREEN)Running $(TARGET):$(RESET)"
 	@./$(TARGET)
 
 release: CFLAGS := $(CFLAGS_RELEASE)
@@ -49,14 +49,14 @@ release: compile
 debug: CFLAGS := $(CFLAGS_DEBUG)
 debug: LDFLAGS := $(LDFLAGS_DEBUG)
 debug: compile
-	@echo "$(GREEN)[Running in DEBUG mode with Sanitizers]$(RESET)"
+	@echo "$(GREEN)Running in DEBUG mode with Sanitizers:$(RESET)"
 	@./$(TARGET)
 
 compile: $(TARGET)
 
 $(TARGET): $(SRCS) src/shaders/shaderdump.h
 	@mkdir -p $(BUILD_DIR)
-	@echo "$(GREEN)Compiling $(TARGET)...$(RESET)"
+	@echo "$(GREEN)Compiling $(TARGET) :$(RESET)"
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
 
@@ -114,10 +114,16 @@ install-toolchain-local:
 	fi
 	@cd $(SLANG_SRC) && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(abspath $(TOOLCHAIN_DIR)) -G Ninja 2>/dev/null || cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(abspath $(TOOLCHAIN_DIR))
 	@cd $(SLANG_SRC) && (ninja -C build install 2>/dev/null || make -C build -j$$(nproc) install)
-	@if [ $$(id -u) -eq 0 ]; then \
-		chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
-	else \
-		sudo chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR) 2>/dev/null || doas chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
+	@CUR_OWNER=$$(stat -c '%u' $(TOOLCHAIN_DIR) 2>/dev/null || stat -f '%u' $(TOOLCHAIN_DIR) 2>/dev/null); \
+	if [ "$$CUR_OWNER" != "$(REAL_UID)" ]; then \
+		echo "$(YELLOW)Fixing ownership of $(TOOLCHAIN_DIR)...$(RESET)"; \
+		if [ $$(id -u) -eq 0 ]; then \
+			chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
+		elif command -v doas >/dev/null 2>&1; then \
+			doas chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
+		elif command -v sudo >/dev/null 2>&1; then \
+			sudo chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
+		fi; \
 	fi
 	@echo "$(GREEN)Local slangc installed to $(TOOLCHAIN_DIR)/bin$(RESET)"
 
@@ -147,11 +153,6 @@ install-toolchain-system:
 	else \
 		echo "$(RED)Error: No way to gain root privileges$(RESET)"; \
 		exit 1; \
-	fi
-	@if [ $$(id -u) -eq 0 ]; then \
-		chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
-	else \
-		sudo chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR) 2>/dev/null || doas chown -R $(REAL_UID):$(REAL_GID) $(TOOLCHAIN_DIR); \
 	fi
 	@echo "$(GREEN)slangc installed$(RESET)"
 
