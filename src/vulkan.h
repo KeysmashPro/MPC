@@ -30,6 +30,14 @@ typedef struct {
     VkFence inFlightFences[VK_IMAGE_COUNT];
 } vk_context;
 
+typedef struct {
+    f64 curr;
+    f64 prev;
+    f64 diff;
+    u64 frame;
+} time_data;
+
+
 void initWindow(void);
 void createInstance(void);
 void createSurface(void);

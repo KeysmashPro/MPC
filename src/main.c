@@ -6,19 +6,6 @@
 
 f64 target_fps = 165.000;
 
-void fps_limiter(void)
-{
-    static f64 time_p = 0;
-    f64 time_n = glfwGetTime();
-    f64 time_d = time_n - time_p;
-    if (time_d < (1.0 / target_fps)) {
-      i64 sleep = (i64)(((1.0 / target_fps) - time_d) * 1e9);
-      struct timespec ts = {0, sleep};
-      nanosleep(&ts, NULL);
-    }
-    time_p = glfwGetTime();
-}
-
 void main_loop(void)
 {
     while (!glfwWindowShouldClose(ctx.window)) {

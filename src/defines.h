@@ -61,9 +61,9 @@ typedef float       f32;
 } while(0)
 
 #define info(...) do { \
-  fprintf(stderr, COLOR_PURPLE "[INFO] " CLR); \
-  fprintf(stderr, __VA_ARGS__); \
-  fprintf(stderr, "\n"); \
+    fprintf(stderr, COLOR_PURPLE "[INFO] " CLR); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); \
 } while(0)
 
 #ifdef DEBUG
