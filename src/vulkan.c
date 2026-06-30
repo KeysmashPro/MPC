@@ -9,13 +9,6 @@
 
 /* VARIABLES */
 
-u64 W_WIDTH  = 720;
-u64 W_HEIGHT = 480;
-
-VkFormat PREFERRED_COLOR_FORMAT = VK_FORMAT_B8G8R8A8_SRGB;
-VkColorSpaceKHR PREFERRED_COLOR_SPACE = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-
-
 typedef struct {
     GLFWwindow *window;
     VkInstance instance;
@@ -41,8 +34,16 @@ typedef struct {
     VkFence inFlightFences[VK_IMAGE_COUNT];
 } vk_context;
 
+
+u64 W_WIDTH  = 720;
+u64 W_HEIGHT = 480;
+
+VkFormat PREFERRED_COLOR_FORMAT = VK_FORMAT_B8G8R8A8_SRGB;
+VkColorSpaceKHR PREFERRED_COLOR_SPACE = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
 vk_context ctx;
 u32 currentFrame = 0;
+
 
 
 void init_window()
@@ -167,8 +168,6 @@ void create_logical_device()
     createInfo.enabledExtensionCount = 1;
     createInfo.enabledLayerCount = layerCount;
     createInfo.ppEnabledLayerNames = layerCount > 0 ? validationLayers : NULL;
-    
-    // Add the feature structure
     createInfo.pNext = &vulkan11Features;
     
     VkResult result = vkCreateDevice(ctx.physicalDevice, &createInfo, NULL, &ctx.device);
@@ -336,7 +335,8 @@ void create_render_pass()
     }
 }
   
-void create_framebuffers() {
+void create_framebuffers()
+{
     for (size_t i = 0; i < VK_IMAGE_COUNT; i++) {
         VkImageView attachments[] = { ctx.swapChainImageViews[i] };
         VkFramebufferCreateInfo framebufferInfo = {0};
@@ -459,8 +459,9 @@ void create_graphics_pipeline()
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = NULL;
     
-    if (vkCreatePipelineLayout(ctx.device, &pipelineLayoutInfo, NULL, &pipelineLayout) != VKS)
+    if (vkCreatePipelineLayout(ctx.device, &pipelineLayoutInfo, NULL, &pipelineLayout) != VKS) {
         fail("failed to create pipeline layout!");
+    }
     
     VkGraphicsPipelineCreateInfo pipelineInfo = {0};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -531,7 +532,8 @@ void create_sync_objects()
     }
 }
 
-void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+{
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -547,7 +549,7 @@ void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
     renderPassInfo.renderArea.extent = ctx.swapChainExtent;
 
     VkClearValue clearValues[1] = {};
-    clearValues[0].color = (VkClearColorValue) {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearValues[0].color = (VkClearColorValue) {{0.0f, 0.0f, 1.0f, 1.0f}};
 
     renderPassInfo.clearValueCount = (uint32_t) (sizeof(clearValues) / sizeof(clearValues[0]));
     renderPassInfo.pClearValues = clearValues;
@@ -579,8 +581,6 @@ void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
 
 void draw_frame()
 {
-    if (window_resize) { handle_window_resize(); return; }
-
     vkWaitForFences(ctx.device, 1, &ctx.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     vkResetFences(ctx.device, 1, &ctx.inFlightFences[currentFrame]);
     
@@ -593,7 +593,6 @@ void draw_frame()
         handle_window_resize();
         return;
     }
-
     
     vkResetCommandBuffer(ctx.commandBuffers[currentFrame], 0);
     record_command_buffer(ctx.commandBuffers[currentFrame], imageIndex);
@@ -632,9 +631,9 @@ void draw_frame()
         handle_window_resize();
      }
     
+    if (window_resize) { handle_window_resize(); }
     currentFrame = (currentFrame + 1) % VK_IMAGE_COUNT;
 }
-
 
 void init_vulkan()
 {
@@ -688,11 +687,12 @@ void cleanup()
     glfwTerminate();
 }
 
-void handle_window_resize() {
+void handle_window_resize()
+{
     i32 width = 0, height = 0;
     glfwGetFramebufferSize(ctx.window, &width, &height);
     
-    while (width == 0 || height == 0) {
+    while (!width + !height) {
         glfwGetFramebufferSize(ctx.window, &width, &height);
         glfwWaitEvents();
     }

@@ -20,10 +20,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
       switch(key) {
         case GLFW_KEY_Q:  glfwSetWindowShouldClose(window, GLFW_TRUE); break;
       }
-    } else if (action == GLFW_RELEASE) {
-      switch(key) {
-        case GLFW_KEY_0: break;
-      }
     }
 }
 

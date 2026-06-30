@@ -4,7 +4,7 @@
 #include "callback.c"
 #include "vulkan.c"
 
-f64 target_fps = 16500.000;
+f64 target_fps = 165.000;
 
 void fps_limiter(void)
 {

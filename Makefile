@@ -36,19 +36,19 @@ REAL_USER := $(shell if [ -n "$$SUDO_USER" ]; then echo $$SUDO_USER; elif [ -n "
 REAL_UID  := $(shell id -u $(REAL_USER) 2>/dev/null || id -u)
 REAL_GID  := $(shell id -g $(REAL_USER) 2>/dev/null || id -g)
 
-all: release
+all: clean compile
 
-run: compile
+run: clean compile
 	@echo "$(GREEN)Running $(TARGET):$(RESET)"
 	@./$(TARGET)
 
 release: CFLAGS := $(CFLAGS_RELEASE)
 release: LDFLAGS := $(LDFLAGS_RELEASE)
-release: compile
+release: clean compile
 
 debug: CFLAGS := $(CFLAGS_DEBUG)
 debug: LDFLAGS := $(LDFLAGS_DEBUG)
-debug: compile
+debug: clean compile
 	@echo "$(GREEN)Running in DEBUG mode with Sanitizers:$(RESET)"
 	@./$(TARGET)
 
@@ -56,7 +56,7 @@ compile: $(TARGET)
 
 $(TARGET): $(SRCS) src/shaders/shaderdump.h
 	@mkdir -p $(BUILD_DIR)
-	@echo "$(GREEN)Compiling $(TARGET) :$(RESET)"
+	@echo "$(GREEN)Compiling $(TARGET):$(RESET)"
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
 
