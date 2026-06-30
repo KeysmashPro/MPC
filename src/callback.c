@@ -1,8 +1,6 @@
-// INPUT CALLBACKS
+/* INPUT CALLBACKS */
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include "./defines.h"
+#include "base.h"
 
 typedef struct {
   f64 mouse_x;
@@ -10,7 +8,12 @@ typedef struct {
   f64 scroll_x;
   f64 scroll_y;
   u8  buttons;
-} InputState;
+} MouseState;
+
+u8 window_resize = 0;
+void framebuffer_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    window_resize = 1;
+}
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
@@ -25,7 +28,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    InputState* state = (InputState*)glfwGetWindowUserPointer(window);
+    MouseState* state = (MouseState*)glfwGetWindowUserPointer(window);
     switch(button) {
       case GLFW_MOUSE_BUTTON_LEFT:   state->buttons = (action == GLFW_PRESS) ? state->buttons | (1 << 0) : state->buttons & ~(1 << 0); break;
       case GLFW_MOUSE_BUTTON_RIGHT:  state->buttons = (action == GLFW_PRESS) ? state->buttons | (1 << 1) : state->buttons & ~(1 << 1); break;
@@ -34,13 +37,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-    InputState* state = (InputState*)glfwGetWindowUserPointer(window);
+    MouseState* state = (MouseState*)glfwGetWindowUserPointer(window);
     state->mouse_x = xpos;
     state->mouse_y = ypos;
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    InputState* state = (InputState*)glfwGetWindowUserPointer(window);
+    MouseState* state = (MouseState*)glfwGetWindowUserPointer(window);
     state->scroll_x = xoffset;
     state->scroll_y = yoffset;
 }
+

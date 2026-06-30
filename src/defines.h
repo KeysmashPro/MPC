@@ -1,11 +1,10 @@
-// MACROS DEFINES AND TYPEDEFS
+/* MACROS DEFINES AND TYPEDEFS */
 
 #ifndef DEFINES_U_H
 #define DEFINES_U_H
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <execinfo.h>
 
 #define iterate(i, n) for (size_t (i) = 0; (i) < (size_t)(n); ++(i))
@@ -25,7 +24,7 @@ typedef double      f64;
 typedef float       f32;
 
 
-// ANSI COLOR CODES
+/* ANSI COLOR CODES */
 #define CLR           "\033[0m"
 #define COLOR_RED     "\033[31m"
 #define COLOR_GREEN   "\033[32m"
@@ -36,7 +35,7 @@ typedef float       f32;
 #define COLOR_BOLD    "\033[1m"
 
 
-// ERROR HANDLING 
+/* ERROR HANDLING */
 #define error(c, ...) do { \
     fprintf(stderr, COLOR_YELLOW "[ERROR] code %d: " CLR, c); \
     fprintf(stderr, __VA_ARGS__); \

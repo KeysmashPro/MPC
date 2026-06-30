@@ -1,20 +1,14 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include <vulkan/vulkan.h>
-#include <time.h>
+/* main.c */
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "../lib/stb_truetype.h"
+#include "base.h"
+#include "callback.c"
+#include "vulkan.c"
 
-#include "./defines.h"
-#include "./vulkan.c"
-#include "./input.c"
-
-f64 target_fps = 165.000;
+f64 target_fps = 16500.000;
 
 void fps_limiter(void)
 {
-    f64 time_p = 0;
+    static f64 time_p = 0;
     f64 time_n = glfwGetTime();
     f64 time_d = time_n - time_p;
     if (time_d < (1.0 / target_fps)) {
@@ -25,29 +19,25 @@ void fps_limiter(void)
     time_p = glfwGetTime();
 }
 
-
-void mainLoop()
+void main_loop(void)
 {
-    debug("Enter func mainLoop");
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(ctx.window)) {
         glfwPollEvents();
-        drawFrame();
-        fps_limiter();
+        draw_frame();
     }
-    vkDeviceWaitIdle(device);
+    vkDeviceWaitIdle(ctx.device);
 }
-
 
 i32 main(i32 argc, char **argv)
 {
-    initWindow();
-    InputState state = {0.0, 0.0};
-    glfwSetWindowUserPointer(window, &state);
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, cursor_pos_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    initVulkan();
-    mainLoop();
+    init_window();
+    MouseState state = {0.0, 0.0};
+    glfwSetWindowUserPointer(ctx.window, &state);
+    glfwSetKeyCallback(ctx.window, key_callback);
+    glfwSetCursorPosCallback(ctx.window, cursor_pos_callback);
+    glfwSetMouseButtonCallback(ctx.window, mouse_button_callback);
+    glfwSetScrollCallback(ctx.window, scroll_callback);
+    init_vulkan();
+    main_loop();
     cleanup(); 
 }
