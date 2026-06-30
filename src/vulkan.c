@@ -1,39 +1,13 @@
 /* Vulkan.c */
 
-#include "base.h"
+#include "defines.h"
 #include "callback.h"
 #include "vulkan.h"
 
-#define VKS VK_SUCCESS
-#define VK_IMAGE_COUNT 3
+#include "./shaders/shaderdump.h"
 
-/* VARIABLES */
 
-typedef struct {
-    GLFWwindow *window;
-    VkInstance instance;
-    VkSurfaceKHR surface;
-    VkPhysicalDevice physicalDevice;
-    VkDevice device;
-    VkQueue queue;
-    u32 DeviceQueueIndex;
-    
-    VkSwapchainKHR swapChain;
-    VkImage swapChainImages[VK_IMAGE_COUNT];
-    VkFormat swapChainImageFormat;
-    VkExtent2D swapChainExtent; 
-    VkImageView swapChainImageViews[VK_IMAGE_COUNT];
-    VkRenderPass renderPass;
-    VkFramebuffer swapChainFramebuffers[VK_IMAGE_COUNT];
-    VkPipeline graphicsPipeline;
-    VkCommandPool commandPool;
-    VkCommandBuffer commandBuffers[VK_IMAGE_COUNT];
-    
-    VkSemaphore imageAvailableSemaphores[VK_IMAGE_COUNT];
-    VkSemaphore renderFinishedSemaphores[VK_IMAGE_COUNT];
-    VkFence inFlightFences[VK_IMAGE_COUNT];
-} vk_context;
-
+/* variables */
 
 u64 W_WIDTH  = 720;
 u64 W_HEIGHT = 480;
@@ -41,9 +15,8 @@ u64 W_HEIGHT = 480;
 VkFormat PREFERRED_COLOR_FORMAT = VK_FORMAT_B8G8R8A8_SRGB;
 VkColorSpaceKHR PREFERRED_COLOR_SPACE = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
+u32 current_frame = 0;
 vk_context ctx;
-u32 currentFrame = 0;
-
 
 
 void init_window()
@@ -581,12 +554,12 @@ void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 
 void draw_frame()
 {
-    vkWaitForFences(ctx.device, 1, &ctx.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(ctx.device, 1, &ctx.inFlightFences[currentFrame]);
+    vkWaitForFences(ctx.device, 1, &ctx.inFlightFences[current_frame], VK_TRUE, UINT64_MAX);
+    vkResetFences(ctx.device, 1, &ctx.inFlightFences[current_frame]);
     
     u32 imageIndex;
     VkResult result = vkAcquireNextImageKHR(ctx.device, ctx.swapChain, UINT64_MAX, 
-                                            ctx.imageAvailableSemaphores[currentFrame], 
+                                            ctx.imageAvailableSemaphores[current_frame], 
                                             VK_NULL_HANDLE, &imageIndex);
     
     if (result == VK_ERROR_OUT_OF_DATE_KHR ) { 
@@ -594,26 +567,26 @@ void draw_frame()
         return;
     }
     
-    vkResetCommandBuffer(ctx.commandBuffers[currentFrame], 0);
-    record_command_buffer(ctx.commandBuffers[currentFrame], imageIndex);
+    vkResetCommandBuffer(ctx.commandBuffers[current_frame], 0);
+    record_command_buffer(ctx.commandBuffers[current_frame], imageIndex);
     
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     
-    VkSemaphore waitSemaphores[] = {ctx.imageAvailableSemaphores[currentFrame]};
+    VkSemaphore waitSemaphores[] = {ctx.imageAvailableSemaphores[current_frame]};
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
     
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &ctx.commandBuffers[currentFrame];
+    submitInfo.pCommandBuffers = &ctx.commandBuffers[current_frame];
     
-    VkSemaphore signalSemaphores[] = {ctx.renderFinishedSemaphores[currentFrame]};
+    VkSemaphore signalSemaphores[] = {ctx.renderFinishedSemaphores[current_frame]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
     
-    vkQueueSubmit(ctx.queue, 1, &submitInfo, ctx.inFlightFences[currentFrame]);
+    vkQueueSubmit(ctx.queue, 1, &submitInfo, ctx.inFlightFences[current_frame]);
     
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -632,7 +605,7 @@ void draw_frame()
      }
     
     if (window_resize) { handle_window_resize(); }
-    currentFrame = (currentFrame + 1) % VK_IMAGE_COUNT;
+    current_frame = (current_frame + 1) % VK_IMAGE_COUNT;
 }
 
 void init_vulkan()

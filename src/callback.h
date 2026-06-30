@@ -1,6 +1,6 @@
 /* callback.c */
 
-#include "base.h"
+#include "defines.h"
 
 u8 window_resize;
 void framebuffer_resize_callback(GLFWwindow *window, i32 width, i32 height);

@@ -3,9 +3,19 @@
 #ifndef DEFINES_U_H
 #define DEFINES_U_H
 
+/* All header files */
+
 #include <stdlib.h>
 #include <stdint.h>
-#include <execinfo.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
+
+/* Macro */
 
 #define iterate(i, n) for (size_t (i) = 0; (i) < (size_t)(n); ++(i))
 
@@ -24,18 +34,18 @@ typedef double      f64;
 typedef float       f32;
 
 
-/* ANSI COLOR CODES */
-#define CLR           "\033[0m"
+/* ansi color codes */
 #define COLOR_RED     "\033[31m"
-#define COLOR_GREEN   "\033[32m"
 #define COLOR_YELLOW  "\033[33m"
+#define COLOR_GREEN   "\033[32m"
 #define COLOR_BLUE    "\033[34m"
 #define COLOR_CYAN    "\033[36m"
 #define COLOR_PURPLE  "\033[35m"
 #define COLOR_BOLD    "\033[1m"
+#define CLR           "\033[0m"
 
 
-/* ERROR HANDLING */
+/* error handling */
 #define error(c, ...) do { \
     fprintf(stderr, COLOR_YELLOW "[ERROR] code %d: " CLR, c); \
     fprintf(stderr, __VA_ARGS__); \

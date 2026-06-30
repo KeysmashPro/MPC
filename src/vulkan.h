@@ -1,6 +1,34 @@
-/* vulkan.c */
+/* vulkan.h */
 
-#include "base.h"
+#include "defines.h"
+
+#define VKS VK_SUCCESS
+#define VK_IMAGE_COUNT 3
+
+typedef struct {
+    GLFWwindow *window;
+    VkInstance instance;
+    VkSurfaceKHR surface;
+    VkPhysicalDevice physicalDevice;
+    VkDevice device;
+    VkQueue queue;
+    u32 DeviceQueueIndex;
+
+    VkSwapchainKHR swapChain;
+    VkImage swapChainImages[VK_IMAGE_COUNT];
+    VkFormat swapChainImageFormat;
+    VkExtent2D swapChainExtent;
+    VkImageView swapChainImageViews[VK_IMAGE_COUNT];
+    VkRenderPass renderPass;
+    VkFramebuffer swapChainFramebuffers[VK_IMAGE_COUNT];
+    VkPipeline graphicsPipeline;
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffers[VK_IMAGE_COUNT];
+
+    VkSemaphore imageAvailableSemaphores[VK_IMAGE_COUNT];
+    VkSemaphore renderFinishedSemaphores[VK_IMAGE_COUNT];
+    VkFence inFlightFences[VK_IMAGE_COUNT];
+} vk_context;
 
 void initWindow(void);
 void createInstance(void);

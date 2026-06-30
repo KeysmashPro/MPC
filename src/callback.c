@@ -1,6 +1,6 @@
 /* INPUT CALLBACKS */
 
-#include "base.h"
+#include "defines.h"
 
 typedef struct {
   f64 mouse_x;

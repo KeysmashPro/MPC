@@ -1,6 +1,6 @@
 /* main.c */
 
-#include "base.h"
+#include "defines.h"
 #include "callback.c"
 #include "vulkan.c"
 
