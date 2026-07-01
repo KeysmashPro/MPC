@@ -4,7 +4,8 @@
 #include "callback.h"
 #include "vulkan.h"
 
-#include "./shaders/shaderdump.h"
+#include "shaders/shaderdump.h"
+#include "init_vulkan.c"
 
 
 /* variables */
@@ -170,18 +171,12 @@ void create_swap_chain(i32 width, i32 height)
             break;
         }
     }
-
-    
-    if (!formatFound) {
-        selectedFormat = formats[0];
-    }
+    if (!formatFound) { selectedFormat = formats[0]; }
     free(formats);
     
     u32 presentModeCount;
     vkGetPhysicalDeviceSurfacePresentModesKHR(ctx.physicalDevice, ctx.surface, &presentModeCount, NULL);
-    if (presentModeCount == 0) {
-        fail("No present modes found!");
-    }
+    if (presentModeCount == 0) { fail("No present modes found!"); }
     
     VkPresentModeKHR* presentModes = malloc(presentModeCount * sizeof(VkPresentModeKHR));
     vkGetPhysicalDeviceSurfacePresentModesKHR(ctx.physicalDevice, ctx.surface, &presentModeCount, presentModes);
@@ -228,10 +223,22 @@ void create_swap_chain(i32 width, i32 height)
     
     VkResult result = vkCreateSwapchainKHR(ctx.device, &createInfo, NULL, &ctx.swapChain);
     if (result != VKS) { fail("Failed to create swapchain! Error: %d", result); }
-    
+    /* Previous realisation
     u32 count;
     vkGetSwapchainImagesKHR(ctx.device, ctx.swapChain, &count, NULL);
     if (count > VK_IMAGE_COUNT) { count = VK_IMAGE_COUNT; }
+    vkGetSwapchainImagesKHR(ctx.device, ctx.swapChain, &count, ctx.swapChainImages);
+    
+    ctx.swapChainImageFormat = createInfo.imageFormat;
+    ctx.swapChainExtent = createInfo.imageExtent;
+    */
+
+    u32 count;
+    vkGetSwapchainImagesKHR(ctx.device, ctx.swapChain, &count, NULL);
+    
+    if (count > MAX_SWAPCHAIN_IMAGES) { fail("Swapchain has too many images!"); }
+    
+    ctx.swapChainImageCount = count;
     vkGetSwapchainImagesKHR(ctx.device, ctx.swapChain, &count, ctx.swapChainImages);
     
     ctx.swapChainImageFormat = createInfo.imageFormat;
@@ -259,7 +266,7 @@ VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags
   
 void create_image_views()
 {
-    for (size_t i = 0; i < VK_IMAGE_COUNT; i++) {
+    for (size_t i = 0; i < ctx.swapChainImageCount; i++) {
         ctx.swapChainImageViews[i] = create_image_view(ctx.swapChainImages[i], ctx.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
     }
 }
@@ -306,10 +313,10 @@ void create_render_pass()
         fail("Failed to create render pass!");
     }
 }
-  
+ 
 void create_framebuffers()
 {
-    for (size_t i = 0; i < VK_IMAGE_COUNT; i++) {
+    for (size_t i = 0; i < ctx.swapChainImageCount; i++) {
         VkImageView attachments[] = { ctx.swapChainImageViews[i] };
         VkFramebufferCreateInfo framebufferInfo = {0};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -608,7 +615,6 @@ void draw_frame()
     
     if (window_resize) { handle_window_resize(); }
     times.frame = (times.frame + 1) % VK_IMAGE_COUNT;
-    times.curr = glfwGetTime();
 }
 
 void init_vulkan()
@@ -636,7 +642,7 @@ void init_vulkan()
 
 void cleanup_swap_chain()
 {
-    iterate(i, VK_IMAGE_COUNT) {
+    iterate(i, ctx.swapChainImageCount) {
             vkDestroyFramebuffer(ctx.device, ctx.swapChainFramebuffers[i], NULL);
         vkDestroyImageView(ctx.device, ctx.swapChainImageViews[i], NULL);
     }
@@ -656,7 +662,6 @@ void cleanup()
     }
 
     vkDestroyRenderPass(ctx.device, ctx.renderPass, NULL);
-    vkDestroySwapchainKHR(ctx.device, ctx.swapChain, NULL);
     vkDestroyDevice(ctx.device, NULL);
     vkDestroySurfaceKHR(ctx.instance, ctx.surface, NULL);
     vkDestroyInstance(ctx.instance, NULL);

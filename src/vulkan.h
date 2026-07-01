@@ -1,9 +1,13 @@
 /* vulkan.h */
 
+#ifndef VULKAN_H
+#define VULKAN_H
+
 #include "defines.h"
 
 #define VKS VK_SUCCESS
 #define VK_IMAGE_COUNT 3
+#define MAX_SWAPCHAIN_IMAGES 8
 
 typedef struct {
     GLFWwindow *window;
@@ -14,13 +18,14 @@ typedef struct {
     VkQueue queue;
     u32 DeviceQueueIndex;
 
+    u32 swapChainImageCount;
     VkSwapchainKHR swapChain;
-    VkImage swapChainImages[VK_IMAGE_COUNT];
+    VkImage swapChainImages[MAX_SWAPCHAIN_IMAGES];
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
-    VkImageView swapChainImageViews[VK_IMAGE_COUNT];
+    VkImageView swapChainImageViews[MAX_SWAPCHAIN_IMAGES];
     VkRenderPass renderPass;
-    VkFramebuffer swapChainFramebuffers[VK_IMAGE_COUNT];
+    VkFramebuffer swapChainFramebuffers[MAX_SWAPCHAIN_IMAGES];
     VkPipeline graphicsPipeline;
     VkCommandPool commandPool;
     VkCommandBuffer commandBuffers[VK_IMAGE_COUNT];
@@ -59,3 +64,5 @@ void initVulkan(void);
 void cleanup_swap_chain(void);
 void cleanup(void);
 void handle_window_resize(void);
+
+#endif

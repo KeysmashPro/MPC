@@ -1,7 +1,7 @@
 /* MACROS DEFINES AND TYPEDEFS */
 
-#ifndef DEFINES_U_H
-#define DEFINES_U_H
+#ifndef DEFINES_H
+#define DEFINES_H
 
 /* All header files */
 
