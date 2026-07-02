@@ -36,10 +36,11 @@ typedef struct {
 } vk_context;
 
 typedef struct {
-    f64 curr;
-    f64 prev;
-    f64 diff;
-    u64 frame;
+    f32 curr;
+    f32 prev;
+    f32 diff;
+    u32 frame;
+    u32 i_frame;
 } time_data;
 
 
